@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Actualizar cita — SUNARP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/actualizar.css">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
+<header class="cabecera">
+  <div class="cabecera__franja" aria-hidden="true"></div>
+  <div class="cabecera__contenido">
+    <a class="cabecera__marca" href="index.html">
+      <span class="cabecera__sello" aria-hidden="true">RP</span>
+      <span class="cabecera__texto"><strong>SUNARP</strong><small>Registros Públicos del Perú</small></span>
+    </a>
+    <nav class="nav-principal" aria-label="Navegación principal">
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="citas.html">Citas</a></li>
+        <li><a href="consulta.html">Mis citas</a></li>
+        <li><a href="tramites.html">Trámites en línea</a></li>
+        <li><a href="contacto.html">Sedes y contacto</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="contenido">
+  <div class="barra-sesion">
+    <span id="usuario-activo">Usuario</span>
+    <a href="consulta.html">Mis citas</a>
+    <button type="button" id="btn-salir">Cerrar sesión</button>
+  </div>
+
+  <section class="cabecera-pagina">
+    <p class="cabecera-pagina__rotulo">Corrección de datos</p>
+    <h1>Actualizar cita</h1>
+    <p class="cabecera-pagina__intro">Solo se puede editar una cita propia mientras su estado sea <strong>registrado</strong>.</p>
+  </section>
+
+  <section class="consulta" aria-labelledby="titulo-formulario">
+    <div class="consulta__panel">
+      <form class="formulario" id="form-actualizar" novalidate>
+        <h2 id="titulo-formulario">Datos de la cita</h2>
+
+        <div class="campo"><label for="codigo">Código de seguimiento</label><input id="codigo" type="text" readonly></div>
+        <div class="campo"><label for="estado">Estado</label><input id="estado" type="text" readonly></div>
+        <div class="campo"><label for="tramite">Trámite a realizar</label>
+          <select id="tramite" required>
+            <option value="" disabled>Seleccione un trámite</option>
+            <option value="inscripcion-propiedad">Inscripción de propiedad</option>
+            <option value="constitucion-empresa">Constitución de empresa</option>
+            <option value="inscripcion-poder">Inscripción de poder</option>
+            <option value="inscripcion-vehicular">Inscripción vehicular</option>
+            <option value="recojo-titulo">Recojo de título archivado</option>
+          </select>
+        </div>
+        <div class="campo"><label for="oficina">Oficina registral</label>
+          <select id="oficina" required>
+            <option value="" disabled>Seleccione una oficina</option>
+            <option value="lima">Zona Registral IX — Lima</option>
+            <option value="arequipa">Zona Registral XII — Arequipa</option>
+            <option value="trujillo">Zona Registral V — Trujillo</option>
+            <option value="cusco">Zona Registral X — Cusco</option>
+            <option value="huancayo">Zona Registral VII — Huancayo</option>
+          </select>
+        </div>
+        <div class="campo campo--fila">
+          <div><label for="fecha">Fecha preferida</label><input type="date" id="fecha" required></div>
+          <div><label for="hora">Horario preferido</label>
+            <select id="hora" required>
+              <option value="" disabled>Elija un horario</option>
+              <option value="manana">Mañana (8:00 a.m. – 12:00 p.m.)</option>
+              <option value="tarde">Tarde (1:00 p.m. – 4:30 p.m.)</option>
+            </select>
+          </div>
+        </div>
+        <div class="campo campo--fila">
+          <div><label for="dni">DNI</label><input type="text" id="dni" pattern="[0-9]{8}" maxlength="8" required></div>
+          <div><label for="nombre">Nombre completo</label><input type="text" id="nombre" required></div>
+        </div>
+        <div class="campo"><label for="celular">Celular</label><input type="tel" id="celular" pattern="[0-9]{9}" maxlength="9" required></div>
+
+        <div class="acciones-formulario">
+          <button type="submit" id="btn-guardar" class="boton boton--sello">Guardar cambios</button>
+          <a id="btn-volver" class="boton boton--linea" href="consulta.html">Volver</a>
+        </div>
+        <p id="mensaje-actualizar" class="mensaje-sistema" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+    <aside class="consulta__ayuda">
+      <h2>Regla de la Semana 7</h2>
+      <p>El sistema valida también en SQL el <strong>id_usuario</strong> y el estado <strong>registrado</strong>, de modo que un cliente no pueda editar una cita de otra persona.</p>
+    </aside>
+  </section>
+</main>
+<footer class="pie"><div class="pie__contenido"><div class="pie__bloque"><strong>SUNARP</strong><p>Superintendencia Nacional de los Registros Públicos</p></div></div><p class="pie__legal">© 2026 SUNARP. Sitio elaborado con fines académicos.</p></footer>
+<script type="module" src="../Js/actualizar/actualizar.js"></script>
+</body>
+</html>

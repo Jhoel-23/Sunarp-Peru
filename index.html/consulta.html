@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis citas — SUNARP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/consulta.css">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
+<header class="cabecera">
+  <div class="cabecera__franja" aria-hidden="true"></div>
+  <div class="cabecera__contenido">
+    <a class="cabecera__marca" href="index.html">
+      <span class="cabecera__sello" aria-hidden="true">RP</span>
+      <span class="cabecera__texto"><strong>SUNARP</strong><small>Registros Públicos del Perú</small></span>
+    </a>
+    <nav class="nav-principal" aria-label="Navegación principal">
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="consulta-partida.html">Consulta de partida</a></li>
+        <li><a href="citas.html">Citas</a></li>
+        <li><a href="consulta.html" aria-current="page">Mis citas</a></li>
+        <li><a href="tramites.html">Trámites en línea</a></li>
+        <li><a href="contacto.html">Sedes y contacto</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="contenido">
+  <div class="barra-sesion">
+    <span id="usuario-activo">Usuario</span>
+    <a href="citas.html">Nueva cita</a>
+    <button type="button" id="btn-salir">Cerrar sesión</button>
+  </div>
+
+  <section class="cabecera-pagina">
+    <p class="cabecera-pagina__rotulo">Seguimiento personal</p>
+    <h1>Mis citas registrales</h1>
+    <p class="cabecera-pagina__intro" id="resumen-citas">Cargando tus citas...</p>
+  </section>
+
+  <section class="cabecera-pagina" aria-label="Listado de citas">
+    <div class="tabla-contenedor">
+      <table class="tabla-crud">
+        <thead>
+          <tr>
+            <th>Código</th><th>Trámite</th><th>Oficina</th><th>Fecha</th>
+            <th>Horario</th><th>DNI</th><th>Estado</th><th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpo-citas"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<footer class="pie">
+  <div class="pie__contenido">
+    <div class="pie__bloque"><strong>SUNARP</strong><p>Superintendencia Nacional de los Registros Públicos</p></div>
+    <div class="pie__bloque"><h4>Enlaces</h4><ul><li><a href="contacto.html">Sedes y contacto</a></li><li><a href="tramites.html">Trámites en línea</a></li></ul></div>
+    <div class="pie__bloque"><h4>Atención al usuario</h4><p>Lunes a viernes, 8:00 a.m. – 4:30 p.m.</p></div>
+  </div>
+  <p class="pie__legal">© 2026 SUNARP. Sitio elaborado con fines académicos.</p>
+</footer>
+<script type="module" src="../Js/consulta/consulta.js"></script>
+</body>
+</html>

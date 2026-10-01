@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trámites en línea — SUNARP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/tramites.css">
+</head>
+<body>
+
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+  <header class="cabecera">
+    <div class="cabecera__franja" aria-hidden="true"></div>
+    <div class="cabecera__contenido">
+      <a class="cabecera__marca" href="index.html">
+        <span class="cabecera__sello" aria-hidden="true">RP</span>
+        <span class="cabecera__texto">
+          <strong>SUNARP</strong>
+          <small>Registros Públicos del Perú</small>
+        </span>
+      </a>
+
+      <nav class="nav-principal" aria-label="Navegación principal">
+        <ul>
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="consulta-partida.html">Consulta de partida</a></li>
+          <li><a href="citas.html">Citas</a></li>
+          <li><a href="tramites.html" aria-current="page">Trámites en línea</a></li>
+          <li><a href="contacto.html">Sedes y contacto</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="contenido">
+
+    <section class="cabecera-pagina">
+      <p class="cabecera-pagina__rotulo">Servicios registrales</p>
+      <h1>Trámites en línea</h1>
+      <p class="cabecera-pagina__intro">
+        Estos son los trámites que puede iniciar sin acercarse a una oficina registral.
+        Revise los requisitos antes de empezar; algunos exigen firma digital o representante.
+      </p>
+    </section>
+
+    <section class="lista-tramites" aria-labelledby="tramites-titulo">
+      <h2 id="tramites-titulo">Trámites disponibles</h2>
+
+      <details class="tramite" open>
+        <summary>
+          <span class="tramite__nombre">Inscripción de propiedad (compraventa)</span>
+          <span class="tramite__etiqueta">Predios</span>
+        </summary>
+        <div class="tramite__contenido">
+          <p>
+            Inscribe la transferencia de un predio a nombre del nuevo propietario, a partir de
+            una escritura pública de compraventa.
+          </p>
+          <h3>Requisitos</h3>
+          <ul>
+            <li>Escritura pública de compraventa, con firmas legalizadas o elevada a notario.</li>
+            <li>Copia de DNI vigente del comprador y del vendedor.</li>
+            <li>Formulario de solicitud de inscripción (FUR) debidamente llenado.</li>
+            <li>Pago de derechos registrales según el valor del predio.</li>
+          </ul>
+          <a class="acceso__enlace" href="citas.html">Reservar cita para presentar el trámite</a>
+        </div>
+      </details>
+
+      <details class="tramite">
+        <summary>
+          <span class="tramite__nombre">Constitución de empresa</span>
+          <span class="tramite__etiqueta">Personas jurídicas</span>
+        </summary>
+        <div class="tramite__contenido">
+          <p>
+            Inscribe la creación de una persona jurídica (SAC, SRL, EIRL, entre otras) y designa
+            a su representante legal.
+          </p>
+          <h3>Requisitos</h3>
+          <ul>
+            <li>Minuta o escritura pública de constitución.</li>
+            <li>Reserva de nombre vigente (opcional, pero recomendada).</li>
+            <li>Copia de DNI de los socios fundadores.</li>
+            <li>Formulario de solicitud de inscripción (FUR).</li>
+          </ul>
+          <a class="acceso__enlace" href="citas.html">Reservar cita para presentar el trámite</a>
+        </div>
+      </details>
+
+      <details class="tramite">
+        <summary>
+          <span class="tramite__nombre">Inscripción de poder</span>
+          <span class="tramite__etiqueta">Personas naturales</span>
+        </summary>
+        <div class="tramite__contenido">
+          <p>
+            Registra un poder otorgado por una persona natural o jurídica a favor de un tercero,
+            para que pueda actuar en su representación.
+          </p>
+          <h3>Requisitos</h3>
+          <ul>
+            <li>Escritura pública de otorgamiento de poder.</li>
+            <li>Copia de DNI del poderdante y del apoderado.</li>
+            <li>Formulario de solicitud de inscripción (FUR).</li>
+          </ul>
+          <a class="acceso__enlace" href="citas.html">Reservar cita para presentar el trámite</a>
+        </div>
+      </details>
+
+      <details class="tramite">
+        <summary>
+          <span class="tramite__nombre">Inscripción vehicular</span>
+          <span class="tramite__etiqueta">Bienes muebles</span>
+        </summary>
+        <div class="tramite__contenido">
+          <p>
+            Inscribe la primera inmatriculación de un vehículo o la transferencia de propiedad
+            de uno ya registrado.
+          </p>
+          <h3>Requisitos</h3>
+          <ul>
+            <li>Tarjeta de identificación vehicular (para transferencias).</li>
+            <li>Certificado policial de identificación vehicular (CPIV).</li>
+            <li>Contrato de compraventa con firmas legalizadas.</li>
+            <li>Formulario de solicitud de inscripción (FUR).</li>
+          </ul>
+          <a class="acceso__enlace" href="citas.html">Reservar cita para presentar el trámite</a>
+        </div>
+      </details>
+
+    </section>
+
+    <section class="tarifario" id="tarifario" aria-labelledby="tarifario-titulo">
+      <h2 id="tarifario-titulo">Tarifario de trámites</h2>
+      <table class="tabla-tarifas tabla-tarifas--ancha">
+        <caption class="visualmente-oculto">Costos de los trámites en línea</caption>
+        <thead>
+          <tr>
+            <th scope="col">Trámite</th>
+            <th scope="col">Derecho registral</th>
+            <th scope="col">Plazo estimado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Inscripción de propiedad</th>
+            <td>Según valor del predio (UIT)</td>
+            <td>7 a 15 días hábiles</td>
+          </tr>
+          <tr>
+            <th scope="row">Constitución de empresa</th>
+            <td>S/ 90.00 aprox.</td>
+            <td>5 a 10 días hábiles</td>
+          </tr>
+          <tr>
+            <th scope="row">Inscripción de poder</th>
+            <td>S/ 42.00 aprox.</td>
+            <td>3 a 7 días hábiles</td>
+          </tr>
+          <tr>
+            <th scope="row">Inscripción vehicular</th>
+            <td>S/ 78.00 aprox.</td>
+            <td>5 a 10 días hábiles</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="tarifario__nota">Los montos son referenciales y varían según la zona registral y el valor del bien inscrito.</p>
+    </section>
+
+  </main>
+
+  <footer class="pie">
+    <div class="pie__contenido">
+      <div class="pie__bloque">
+        <strong>SUNARP</strong>
+        <p>Superintendencia Nacional de los Registros Públicos</p>
+      </div>
+      <div class="pie__bloque">
+        <h4>Enlaces</h4>
+        <ul>
+          <li><a href="contacto.html">Sedes y contacto</a></li>
+          <li><a href="tramites.html">Trámites en línea</a></li>
+          <li><a href="#">Libro de reclamaciones</a></li>
+          <li><a href="#">Transparencia</a></li>
+        </ul>
+      </div>
+      <div class="pie__bloque">
+        <h4>Atención al usuario</h4>
+        <p>Lunes a viernes, 8:00 a.m. – 4:30 p.m.</p>
+        <p>Línea gratuita: 0800-00000</p>
+      </div>
+    </div>
+    <p class="pie__legal">© 2026 SUNARP. Sitio elaborado con fines académicos.</p>
+  </footer>
+
+</body>
+</html>

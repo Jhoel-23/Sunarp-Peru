@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso — SUNARP</title>
+  <link rel="stylesheet" href="../css/login.css">
+</head>
+<body>
+<main>
+  <section id="acceso">
+    <h1>Bienvenido</h1>
+    <p class="sub">Inicia sesión o crea tu cuenta.</p>
+
+    <div class="tabs" role="tablist" aria-label="Opciones de acceso">
+      <button type="button" id="tab-login" class="activo">Iniciar sesión</button>
+      <button type="button" id="tab-registro">Crear cuenta</button>
+    </div>
+
+    <form id="form-login" class="activo">
+      <label for="correo-login">Correo electrónico</label>
+      <input type="email" id="correo-login" required autocomplete="email">
+
+      <label for="contrasena-login">Contraseña</label>
+      <input type="password" id="contrasena-login" required autocomplete="current-password">
+
+      <button class="enviar" type="submit">Entrar</button>
+    </form>
+
+    <form id="form-registro">
+      <label for="nombre-registro">Nombre completo</label>
+      <input type="text" id="nombre-registro" required autocomplete="name">
+
+      <label for="correo">Correo electrónico</label>
+      <input type="email" id="correo" required autocomplete="email">
+
+      <label for="contrasena">Contraseña</label>
+      <input type="password" id="contrasena" required minlength="4" autocomplete="new-password">
+
+      <label for="contrasena2">Repite la contraseña</label>
+      <input type="password" id="contrasena2" required minlength="4" autocomplete="new-password">
+
+      <button class="enviar" type="submit">Registrarme</button>
+    </form>
+
+    <div id="msg" class="msg" role="status" aria-live="polite"></div>
+    <p class="nota">Las cuentas creadas desde aquí se registran con rol <strong>cliente</strong>. Administrador y empleado se cargan directamente en Neon, como indica la Semana 7.</p>
+  </section>
+</main>
+<script type="module" src="../Js/auth/login.js"></script>
+</body>
+</html>

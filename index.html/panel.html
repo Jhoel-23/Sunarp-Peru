@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de gestión — SUNARP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/panel.css">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
+<header class="cabecera">
+  <div class="cabecera__franja" aria-hidden="true"></div>
+  <div class="cabecera__contenido">
+    <a class="cabecera__marca" href="index.html">
+      <span class="cabecera__sello" aria-hidden="true">RP</span>
+      <span class="cabecera__texto"><strong>SUNARP</strong><small>Registros Públicos del Perú</small></span>
+    </a>
+    <nav class="nav-principal"><ul><li><a href="panel.html" aria-current="page">Panel CRUD</a></li><li><a href="index.html">Sitio público</a></li></ul></nav>
+  </div>
+</header>
+<main id="contenido">
+  <div class="barra-sesion">
+    <span id="usuario-activo">Usuario</span>
+    <button type="button" id="btn-salir">Cerrar sesión</button>
+  </div>
+
+  <section class="cabecera-pagina">
+    <p class="cabecera-pagina__rotulo">Gestión interna</p>
+    <h1>Panel de citas registrales</h1>
+    <p class="cabecera-pagina__intro" id="resumen-panel">Cargando registros...</p>
+    <div id="estado-turno" class="aviso-turno" role="status" aria-live="polite">Validando turno del usuario...</div>
+  </section>
+
+  <div class="panel-grid">
+    <section class="panel-caja">
+      <h2>Crear registro</h2>
+      <p>Registro realizado por administrador/empleado. Se guardará con <code>id_usuario = NULL</code>.</p>
+      <form class="formulario" id="form-crear">
+        <div class="campo"><label>Nombre completo</label><input name="nombre" type="text" required></div>
+        <div class="campo"><label>DNI</label><input name="dni" type="text" pattern="[0-9]{8}" maxlength="8" required></div>
+        <div class="campo"><label>Trámite</label><select name="tramite" required><option value="" selected disabled>Seleccione</option><option>Inscripción de propiedad</option><option>Constitución de empresa</option><option>Inscripción de poder</option><option>Inscripción vehicular</option><option>Recojo de título archivado</option></select></div>
+        <div class="campo"><label>Oficina</label><select name="oficina" required><option value="" selected disabled>Seleccione</option><option>Zona Registral IX — Lima</option><option>Zona Registral XII — Arequipa</option><option>Zona Registral V — Trujillo</option><option>Zona Registral X — Cusco</option><option>Zona Registral VII — Huancayo</option></select></div>
+        <div class="campo"><label>Fecha</label><input name="fecha" type="date" required></div>
+        <div class="campo"><label>Horario</label><select name="hora" required><option value="" selected disabled>Seleccione</option><option>Mañana (8:00 a.m. – 12:00 p.m.)</option><option>Tarde (1:00 p.m. – 4:30 p.m.)</option></select></div>
+        <div class="campo"><label>Celular</label><input name="celular" type="tel" pattern="[0-9]{9}" maxlength="9" required></div>
+        <button class="boton boton--sello" type="submit">Crear cita</button>
+      </form>
+      <p id="mensaje-panel" class="mensaje-sistema" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="panel-caja">
+      <h2>Todos los registros</h2>
+      <div class="tabla-contenedor">
+        <table class="tabla-crud">
+          <thead><tr><th>Código</th><th>Nombre</th><th>DNI</th><th>Trámite</th><th>Fecha</th><th>Estado</th><th>Cliente</th><th>Acciones</th></tr></thead>
+          <tbody id="cuerpo-panel"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel-caja panel-caja--historial" aria-labelledby="titulo-historial">
+    <div class="historial-encabezado">
+      <div>
+        <p class="cabecera-pagina__rotulo">Trazabilidad</p>
+        <h2 id="titulo-historial">Historial de cambios de estado</h2>
+      </div>
+      <p>Registra qué usuario cambió el estado, su rol, turno y la fecha del cambio.</p>
+    </div>
+    <div class="tabla-contenedor">
+      <table class="tabla-crud tabla-historial">
+        <thead>
+          <tr>
+            <th>Cita</th>
+            <th>Estado anterior</th>
+            <th>Estado nuevo</th>
+            <th>Usuario</th>
+            <th>Rol</th>
+            <th>Turno</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpo-historial">
+          <tr><td colspan="7">Cargando historial...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<dialog id="modal-editar">
+  <div class="modal-contenido">
+    <h2>Editar registro</h2>
+    <form class="formulario" id="form-editar">
+      <input type="hidden" name="id">
+      <div class="campo"><label>Código</label><input name="codigo" type="text" readonly></div>
+      <div class="campo campo--fila"><div><label>Nombre</label><input name="nombre" type="text" required></div><div><label>DNI</label><input name="dni" type="text" maxlength="8" required></div></div>
+      <div class="campo"><label>Trámite</label><input name="tramite" type="text" required></div>
+      <div class="campo"><label>Oficina</label><input name="oficina" type="text"></div>
+      <div class="campo campo--fila"><div><label>Fecha</label><input name="fecha" type="date"></div><div><label>Horario</label><input name="hora" type="text"></div></div>
+      <div class="campo campo--fila">
+        <div><label>Celular</label><input name="celular" type="tel"></div>
+        <div>
+          <label>Estado</label>
+          <select name="estado" required>
+            <option value="registrado">registrado</option>
+            <option value="atendido">atendido</option>
+            <option value="rechazado">rechazado</option>
+            <option value="cancelado">cancelado</option>
+          </select>
+          <small id="nota-estado-turno" class="nota-turno">Validando permiso para cambiar estado...</small>
+        </div>
+      </div>
+      <div class="acciones-formulario"><button class="boton boton--sello" type="submit">Guardar</button><button class="boton boton--linea" id="cerrar-modal" type="button">Cancelar</button></div>
+    </form>
+  </div>
+</dialog>
+
+<footer class="pie"><div class="pie__contenido"><div class="pie__bloque"><strong>SUNARP</strong><p>Superintendencia Nacional de los Registros Públicos</p></div></div><p class="pie__legal">© 2026 SUNARP. Sitio elaborado con fines académicos.</p></footer>
+<script type="module" src="../Js/panel/panel.js"></script>
+</body>
+</html>
