@@ -1,8 +1,45 @@
 {
+    "$schema": "https://openapi.vercel.sh/vercel.json",
     "rewrites": [
         {
             "source": "/",
             "destination": "/index.html/index.html"
+        },
+        {
+            "source": "/index.html",
+            "destination": "/index.html/index.html"
+        },
+        {
+            "source": "/login.html",
+            "destination": "/index.html/login.html"
+        },
+        {
+            "source": "/citas.html",
+            "destination": "/index.html/citas.html"
+        },
+        {
+            "source": "/consulta.html",
+            "destination": "/index.html/consulta.html"
+        },
+        {
+            "source": "/consulta-partida.html",
+            "destination": "/index.html/consulta-partida.html"
+        },
+        {
+            "source": "/actualizar.html",
+            "destination": "/index.html/actualizar.html"
+        },
+        {
+            "source": "/panel.html",
+            "destination": "/index.html/panel.html"
+        },
+        {
+            "source": "/tramites.html",
+            "destination": "/index.html/tramites.html"
+        },
+        {
+            "source": "/contacto.html",
+            "destination": "/index.html/contacto.html"
         }
     ]
 }
