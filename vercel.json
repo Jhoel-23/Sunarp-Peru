@@ -1,18 +1,8 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
-  "buildCommand": "",
-  "outputDirectory": ".",
-  "redirects": [
+  "rewrites": [
     {
       "source": "/",
-      "destination": "/login.html",
-      "permanent": false
-    },
-    {
-      "source": "/citas.html",
-      "destination": "/registro.html",
-      "permanent": false
+      "destination": "/index.html"
     }
   ]
 }
