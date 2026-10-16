@@ -21,7 +21,7 @@ const etiquetasOficina = {
 };
 
 const etiquetasConsulta = {
-  vigencia: 'Vigencia de poder / titularidad',
+  vigencia: 'Consulta preliminar de titularidad',
   'cargas-gravamenes': 'Cargas y gravámenes',
   'copia-literal': 'Copia literal completa'
 };
@@ -69,16 +69,27 @@ form.addEventListener('submit', (event) => {
   const codigo = generarCodigo();
 
   resultadoCodigo.textContent = codigo;
-  resultadoDetalle.innerHTML = `
-    <dl class="resultado-consulta__datos">
-      <div><dt>Tipo de registro</dt><dd>${escapar(etiquetasTipo[tipo] || tipo)}</dd></div>
-      <div><dt>Número de partida</dt><dd>${escapar(numero)}</dd></div>
-      <div><dt>Oficina registral</dt><dd>${escapar(etiquetasOficina[oficina] || oficina)}</dd></div>
-      <div><dt>Tipo de consulta</dt><dd>${escapar(etiquetasConsulta[tipoConsulta] || tipoConsulta)}</dd></div>
-      <div><dt>Costo referencial</dt><dd>${escapar(costos[tipoConsulta] || '—')}</dd></div>
-      <div><dt>Correo</dt><dd>${escapar(correo)}</dd></div>
-    </dl>
-  `;
+  resultadoDetalle.replaceChildren();
+  const lista = document.createElement('dl');
+  lista.className = 'resultado-consulta__datos';
+  const campos = [
+    ['Tipo de registro', etiquetasTipo[tipo] || tipo],
+    ['Número de partida', numero],
+    ['Oficina registral', etiquetasOficina[oficina] || oficina],
+    ['Tipo de consulta', etiquetasConsulta[tipoConsulta] || tipoConsulta],
+    ['Costo referencial', costos[tipoConsulta] || '—'],
+    ['Correo', correo]
+  ];
+  for (const [etiqueta, valor] of campos) {
+    const grupo = document.createElement('div');
+    const dt = document.createElement('dt');
+    const dd = document.createElement('dd');
+    dt.textContent = etiqueta;
+    dd.textContent = valor;
+    grupo.append(dt, dd);
+    lista.append(grupo);
+  }
+  resultadoDetalle.append(lista);
 
   resultado.hidden = false;
 

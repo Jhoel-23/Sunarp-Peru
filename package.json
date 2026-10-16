@@ -1,0 +1,9 @@
+{
+  "name": "sunarp-caso24-semana09",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node herramientas/servidor.cjs",
+    "test": "node pruebas/validaciones.mjs && node --experimental-vm-modules pruebas/pasarela.mjs && node --experimental-vm-modules pruebas/modulos.mjs && node --experimental-vm-modules pruebas/roles.mjs && node pruebas/servidor.mjs && node pruebas/formularios.mjs && node --experimental-vm-modules pruebas/confirmaciones.mjs && node pruebas/fechas.mjs"
+  }
+}

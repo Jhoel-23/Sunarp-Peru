@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Joel Carlos Quispe Clemente">
+    <title>Comprobante de pago — SUNARP Perú</title>
+    <link rel="stylesheet" href="css/comprobante.css">
+    <link rel="stylesheet" href="css/formularios.css">
+    <script type="module" src="js/comun/formularios.js"></script>
+  </head>
+  <body>
+    <a class="saltar" href="#contenido">Saltar al contenido</a>
+    <header class="cabecera">
+      <div class="cabecera__franja" aria-hidden="true">
+      </div>
+      <div class="cabecera__contenido">
+        <a class="cabecera__marca" href="index.html">
+          <span class="cabecera__sello" aria-hidden="true">RP</span>
+          <span class="cabecera__texto">
+            <strong>SUNARP</strong>
+            <small>Registros Públicos del Perú</small>
+          </span>
+        </a>
+        <nav class="nav-principal" aria-label="Navegación principal">
+          <ul>
+            <li>
+              <a href="index.html">Inicio</a>
+            </li>
+            <li>
+              <a href="registro.html" data-roles="cliente">Nueva solicitud</a>
+            </li>
+            <li>
+              <a href="consulta.html" data-roles="cliente">Mis solicitudes</a>
+            </li>
+            <li>
+              <a href="pago.html" data-roles="cliente">Pagar</a>
+            </li>
+            <li>
+              <a href="panel.html" data-roles="administrador empleado">Gestión</a>
+            </li>
+            <li>
+              <a href="caja.html" data-roles="administrador cajero">Caja</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="contenido" class="modulo-caso24">
+      <div class="barra-sesion">
+        <span id="usuario-activo">
+        </span>
+        <button type="button" id="cerrar-sesion" class="secundario">Cerrar sesión</button>
+      </div>
+      <p class="rotulo">VIGENCIA DE PODER</p>
+      <h1>Comprobante de pago</h1>
+      <section class="tarjeta recibo">
+        <p class="etiqueta">CONSTANCIA ACADÉMICA DE PAGO</p>
+        <h2>Expedición de vigencia de poder</h2>
+        <div id="comprobante" role="status" aria-live="polite">
+          Cargando comprobante…
+        </div>
+        <p>Este comprobante acredita el pago simulado. No sustituye una vigencia de poder oficial ni una firma digital certificada.</p>
+      </section>
+      <div class="acciones no-imprimir">
+        <button type="button" id="imprimir" disabled>Imprimir comprobante</button>
+        <a class="boton secundario" id="volver">Volver</a>
+      </div>
+    </main>
+    <footer class="pie">
+      <div class="pie__contenido">
+        <div class="pie__bloque">
+          <strong>SUNARP</strong>
+          <p>Superintendencia Nacional de los Registros Públicos</p>
+        </div>
+        <div class="pie__bloque">
+          <h4>Enlaces</h4>
+          <ul>
+            <li>
+              <a href="contacto.html">Sedes y contacto</a>
+            </li>
+            <li>
+              <a href="tramites.html">Trámites en línea</a>
+            </li>
+          </ul>
+        </div>
+        <div class="pie__bloque">
+          <h4>Atención al usuario</h4>
+          <p>Lunes a viernes, 8:00 a.m. – 4:30 p.m.</p>
+        </div>
+      </div>
+      <p class="pie__legal">© 2026 SUNARP. Sitio elaborado con fines académicos.</p>
+    </footer>
+    <script type="module" src="js/comprobante/comprobante.js">
+    </script>
+    <script src="js/comun/navegacion.js" defer></script>
+  </body>
+</html>

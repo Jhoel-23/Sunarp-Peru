@@ -1,0 +1,23 @@
+/* Componentes compartidos: validación y confirmaciones. */
+.sunarp-error-campo { display: block; color: #a32d2b; font: 500 12px/1.5 system-ui,sans-serif; margin: 5px 0 10px; }
+.sunarp-error-campo[hidden] { display: none; }
+input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: #b52c32 !important; outline-color: #b52c32; box-shadow: 0 0 0 2px #b52c3210; }
+.sunarp-dialogo { box-sizing: border-box; width: min(94vw, 510px); max-height: 88dvh; padding: 30px; border: 1px solid #d7e2e1; border-top: 4px solid #0f7772; border-radius: 18px; background: #fff; color: #182f40; box-shadow: 0 28px 100px #071d4655; font: 14px/1.6 system-ui,sans-serif; overflow-y: auto; animation: dialogo-entrada .18s ease-out; }
+.sunarp-dialogo::backdrop { background: #0c1d35a6; backdrop-filter: blur(5px); }
+.sunarp-dialogo h2 { margin: 12px 0 8px; font: 700 24px/1.25 system-ui,sans-serif; color: #142a43; }
+.sunarp-dialogo p { color: #566775; margin: 0 0 20px; }
+.sunarp-dialogo-icono { width: 44px; height: 44px; border-radius: 14px; background: #e7f5f1; color: #087565; display: grid; place-items: center; font-size: 24px; font-weight: 700; }
+.sunarp-dialogo[data-tipo="error"] .sunarp-dialogo-icono { color: #a52d30; background: #ffeded; }
+.sunarp-dialogo dl { display: grid; grid-template-columns: minmax(100px, .8fr) minmax(0, 1.2fr); gap: 10px 15px; padding: 18px; background: #f5f8f8; border: 1px solid #e7eeee; border-radius: 10px; margin: 20px 0; }
+.sunarp-dialogo dl[hidden] { display: none; }
+.sunarp-dialogo dt { color: #60727d; font-size: 12px; }
+.sunarp-dialogo dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.sunarp-dialogo-pie { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+.sunarp-dialogo button { cursor: pointer; border-radius: 8px; padding: 11px 17px; font: 600 13px/1.4 system-ui,sans-serif; }
+.sunarp-dialogo .sunarp-confirmar { background: #0e756e; border: 1px solid #0e756e; color: white; }
+.sunarp-dialogo .sunarp-volver { background: white; border: 1px solid #bdcdce; color: #24434b; }
+.sunarp-dialogo button[hidden] { display: none; }
+.sunarp-dialogo button:focus-visible { outline: 3px solid #d0a95e; outline-offset: 3px; }
+@keyframes dialogo-entrada { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+@media (max-width: 480px) { .sunarp-dialogo { padding: 22px; } .sunarp-dialogo-pie button { width: 100%; } }
+@media (prefers-reduced-motion: reduce) { .sunarp-dialogo { animation: none; } }

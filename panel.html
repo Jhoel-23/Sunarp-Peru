@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Joel Carlos Quispe Clemente">
+    <title>Gestión de solicitudes — SUNARP Perú</title>
+    <link rel="stylesheet" href="css/panel.css">
+    <link rel="stylesheet" href="css/formularios.css">
+    <script type="module" src="js/comun/formularios.js"></script>
+  </head>
+  <body>
+    <a class="saltar" href="#contenido">Saltar al contenido</a>
+    <header class="cabecera">
+      <div class="cabecera__franja" aria-hidden="true">
+      </div>
+      <div class="cabecera__contenido">
+        <a class="cabecera__marca" href="index.html">
+          <span class="cabecera__sello" aria-hidden="true">RP</span>
+          <span class="cabecera__texto">
+            <strong>SUNARP</strong>
+            <small>Registros Públicos del Perú</small>
+          </span>
+        </a>
+        <nav class="nav-principal" aria-label="Navegación principal">
+          <ul>
+            <li>
+              <a href="index.html">Inicio</a>
+            </li>
+            <li>
+              <a href="registro.html" data-roles="cliente">Nueva solicitud</a>
+            </li>
+            <li>
+              <a href="consulta.html" data-roles="cliente">Mis solicitudes</a>
+            </li>
+            <li>
+              <a href="pago.html" data-roles="cliente">Pagar</a>
+            </li>
+            <li>
+              <a href="panel.html" data-roles="administrador empleado">Gestión</a>
+            </li>
+            <li>
+              <a href="caja.html" data-roles="administrador cajero">Caja</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="contenido" class="modulo-caso24">
+      <div class="barra-sesion">
+        <span id="usuario-activo">
+        </span>
+        <button type="button" id="cerrar-sesion" class="secundario">Cerrar sesión</button>
+      </div>
+      <p class="rotulo">VIGENCIA DE PODER</p>
+      <h1>Gestión de solicitudes</h1>
+      <p id="estado-turno" class="mensaje" role="status" aria-live="polite">
+      </p>
+      <p id="mensaje-panel" class="mensaje" role="status" aria-live="polite">
+      </p>
+      <details class="tarjeta">
+        <summary>
+          Registrar atención presencial
+        </summary>
+        <form id="form-crear">
+          <div class="campo">
+            <label for="crear-nombre">Nombre completo</label>
+            <input id="crear-nombre" name="nombre" autocomplete="name" minlength="3" maxlength="100" required>
+          </div>
+          <div class="fila">
+            <div class="campo">
+              <label for="crear-dni">DNI</label>
+              <input id="crear-dni" name="dni" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" required>
+            </div>
+            <div class="campo">
+              <label for="crear-celular">Celular</label>
+              <input id="crear-celular" name="celular" type="tel" pattern="9[0-9]{8}" maxlength="9" required>
+            </div>
+          </div>
+          <div class="campo">
+            <label for="crear-tramite">Servicio</label>
+            <input id="crear-tramite" name="tramite" value="Expedición de vigencia de poder" readonly>
+          </div>
+          <div class="campo">
+            <label for="crear-oficina">Oficina registral</label>
+            <select id="crear-oficina" name="oficina" required>
+              <option value="" selected disabled>Selecciona una oficina</option>
+              <option>Zona Registral IX — Lima</option>
+              <option>Zona Registral V — Trujillo</option>
+              <option>Zona Registral XII — Arequipa</option>
+              <option>Zona Registral X — Cusco</option>
+              <option>Zona Registral VII — Huancayo</option>
+            </select>
+          </div>
+          <div class="fila">
+            <div class="campo">
+              <label for="crear-fecha">Fecha de la cita</label>
+              <input id="crear-fecha" name="fecha" type="date" required>
+            </div>
+            <div class="campo">
+              <label for="crear-hora">Horario</label>
+              <select id="crear-hora" name="hora" required>
+                <option value="" selected disabled>Selecciona un horario</option>
+                <option>Mañana (8:00 a. m. – 12:00 p. m.)</option>
+                <option>Tarde (1:00 p. m. – 4:30 p. m.)</option>
+              </select>
+            </div>
+          </div>
+          <div class="campo">
+            <label for="crear-paginas">Número de páginas del documento</label>
+            <input id="crear-paginas" name="paginas" type="number" min="1" step="1" value="1" required aria-describedby="crear-regla">
+            <small id="crear-regla">S/ 24.00 por las dos primeras páginas y S/ 6.00 por cada página desde la tercera.</small>
+          </div>
+          <p class="cotizacion">
+            Total
+            <output id="crear-monto" aria-live="polite">
+              S/ 24.00
+            </output>
+          </p>
+          <button type="submit">Crear solicitud pendiente</button>
+        </form>
+      </details>
+      <section class="tarjeta">
+        <h2>Solicitudes registrales</h2>
+        <button type="button" id="refrescar" class="secundario">Actualizar</button>
+        <p id="resumen-panel">
+        </p>
+        <div class="tabla-scroll">
+          <table>
+            <caption>
+              Gestión, pagos y habilitación de firma
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Código</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">DNI</th>
+                <th scope="col">Páginas</th>
+                <th scope="col">Total</th>
+                <th scope="col">Atención</th>
+                <th scope="col">Pago / canal</th>
+                <th scope="col">Firma</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpo-panel">
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="tarjeta">
+        <h2>Historial de estados</h2>
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Cita</th>
+                <th scope="col">Anterior</th>
+                <th scope="col">Nuevo</th>
+                <th scope="col">Usuario</th>
+                <th scope="col">Fecha Lima</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpo-historial">
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <dialog id="modal-editar" aria-labelledby="titulo-editar">
+      <h2 id="titulo-editar">Editar solicitud</h2>
+      <form id="form-editar">
+        <input type="hidden" name="id">
+        <fieldset id="datos-editables">
+          <legend>
+            Datos de la solicitud
+          </legend>
+          <div class="campo">
+            <label for="panel-editar-nombre">Nombre completo</label>
+            <input id="panel-editar-nombre" name="nombre" autocomplete="name" minlength="3" maxlength="100" required>
+          </div>
+          <div class="fila">
+            <div class="campo">
+              <label for="panel-editar-dni">DNI</label>
+              <input id="panel-editar-dni" name="dni" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" required>
+            </div>
+            <div class="campo">
+              <label for="panel-editar-celular">Celular</label>
+              <input id="panel-editar-celular" name="celular" type="tel" pattern="9[0-9]{8}" maxlength="9" required>
+            </div>
+          </div>
+          <div class="campo">
+            <label for="panel-editar-tramite">Servicio</label>
+            <input id="panel-editar-tramite" name="tramite" value="Expedición de vigencia de poder" readonly>
+          </div>
+          <div class="campo">
+            <label for="panel-editar-oficina">Oficina registral</label>
+            <select id="panel-editar-oficina" name="oficina" required>
+              <option value="" selected disabled>Selecciona una oficina</option>
+              <option>Zona Registral IX — Lima</option>
+              <option>Zona Registral V — Trujillo</option>
+              <option>Zona Registral XII — Arequipa</option>
+              <option>Zona Registral X — Cusco</option>
+              <option>Zona Registral VII — Huancayo</option>
+            </select>
+          </div>
+          <div class="fila">
+            <div class="campo">
+              <label for="panel-editar-fecha">Fecha de la cita</label>
+              <input id="panel-editar-fecha" name="fecha" type="date" required>
+            </div>
+            <div class="campo">
+              <label for="panel-editar-hora">Horario</label>
+              <select id="panel-editar-hora" name="hora" required>
+                <option value="" selected disabled>Selecciona un horario</option>
+                <option>Mañana (8:00 a. m. – 12:00 p. m.)</option>
+                <option>Tarde (1:00 p. m. – 4:30 p. m.)</option>
+              </select>
+            </div>
+          </div>
+          <div class="campo">
+            <label for="panel-editar-paginas">Número de páginas del documento</label>
+            <input id="panel-editar-paginas" name="paginas" type="number" min="1" step="1" value="1" required aria-describedby="panel-editar-regla">
+            <small id="panel-editar-regla">S/ 24.00 por las dos primeras páginas y S/ 6.00 por cada página desde la tercera.</small>
+          </div>
+          <p class="cotizacion">
+            Total
+            <output id="panel-editar-monto" aria-live="polite">
+              S/ 24.00
+            </output>
+          </p>
+        </fieldset>
+        <label for="panel-estado">Estado operativo</label>
+        <select name="estado" id="panel-estado">
+          <option value="registrado">Registrado</option>
+          <option value="rechazado">Rechazado</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+        <p id="nota-editar">
+        </p>
+        <p id="mensaje-editar" class="mensaje" role="status" aria-live="polite">
+        </p>
+        <button type="submit">Guardar</button>
+        <button type="button" id="cerrar-modal" class="secundario">Cancelar</button>
+      </form>
+    </dialog>
+    <dialog class="sunarp-dialogo" id="dialogo-accion" aria-labelledby="titulo-accion">
+      <h2 id="titulo-accion">Confirmar acción</h2>
+      <p id="texto-accion">
+      </p>
+      <button type="button" id="confirmar-accion">Confirmar</button>
+      <button type="button" id="cancelar-accion" class="secundario">Cancelar</button>
+    </dialog>
+    <footer class="pie">
+      <div class="pie__contenido">
+        <div class="pie__bloque">
+          <strong>SUNARP</strong>
+          <p>Superintendencia Nacional de los Registros Públicos</p>
+        </div>
+        <div class="pie__bloque">
+          <h4>Enlaces</h4>
+          <ul>
+            <li>
+              <a href="contacto.html">Sedes y contacto</a>
+            </li>
+            <li>
+              <a href="tramites.html">Trámites en línea</a>
+            </li>
+          </ul>
+        </div>
+        <div class="pie__bloque">
+          <h4>Atención al usuario</h4>
+          <p>Lunes a viernes, 8:00 a.m. – 4:30 p.m.</p>
+        </div>
+      </div>
+      <p class="pie__legal">© 2026 SUNARP. Sitio elaborado con fines académicos.</p>
+    </footer>
+    <script type="module" src="js/panel/panel.js">
+    </script>
+    <script src="js/comun/navegacion.js" defer></script>
+  </body>
+</html>

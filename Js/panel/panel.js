@@ -1,425 +1,217 @@
 import { sql } from '../config/neon-config.js';
-import { exigirSesion, cerrarSesion } from '../auth/auth.js';
+import { exigirRol } from '../auth/auth.js';
+import { calcularMontoServicio, formatearSoles } from '../registro/tarifario.js';
+import { conectarCotizador, leerFormulario, validarDatos, cargarCampos } from '../registro/formulario.js';
+import { $, iniciarInterfaz, mensaje, celda, boton, enlace, filaVacia, fechaLima, estadoFirma, errorAmigable } from '../comun/ui.js';
 
-const usuario = exigirSesion(['administrador', 'empleado']);
-if (!usuario) throw new Error('Sesión no válida');
-
-const $ = (id) => document.getElementById(id);
-const tbody = $('cuerpo-panel');
-const resumen = $('resumen-panel');
+const usuario = exigirRol('administrador', 'empleado');
+if (!usuario) throw new Error('Acceso denegado');
+iniciarInterfaz(usuario);
 const formCrear = $('form-crear');
 const formEditar = $('form-editar');
 const modal = $('modal-editar');
-const estadoTurno = $('estado-turno');
-const historialBody = $('cuerpo-historial');
+conectarCotizador(formCrear, $('crear-monto'));
+const cotizarEditar = conectarCotizador(formEditar, $('panel-editar-monto'));
+let registros = [];
+let original = null;
+let permisoTurno = false;
+let ocupado = false;
+let accionPendiente = null;
+let cargando = false;
 
-$('btn-salir').addEventListener('click', cerrarSesion);
-
-const ETIQUETAS_TURNO = {
-  manana: 'Mañana (08:00 a 13:00)',
-  tarde: 'Tarde (13:00 a 18:00)',
-  'noche-madrugada': 'Noche–madrugada (18:00 a 08:00)'
-};
-
-let permisoTurno = {
-  puedeCambiarEstado: usuario.rol === 'administrador',
-  turnoActual: null,
-  horaPeru: '',
-  turnoUsuario: usuario.turno || null
-};
-
-function escapar(texto) {
-  return String(texto ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
+async function obtenerPermiso() {
+  const filas = await sql`SELECT c24_puede_gestionar(${usuario.id}) AS permitido`;
+  permisoTurno = Boolean(filas[0].permitido);
+  $('estado-turno').textContent = permisoTurno
+    ? 'Turno habilitado: puedes gestionar el estado y firmar solicitudes habilitadas.'
+    : 'Fuera de turno: puedes consultar y corregir datos pendientes; el cambio de estado y la firma están bloqueados.';
 }
 
-function textoSelect(form, nombre) {
-  const s = form.elements[nombre];
-  return s.options[s.selectedIndex].textContent.trim();
-}
-
-function fechaISO(fecha) {
-  if (!fecha) return '';
-
-  if (fecha instanceof Date && !Number.isNaN(fecha.getTime())) {
-    const anio = fecha.getUTCFullYear();
-    const mes = String(fecha.getUTCMonth() + 1).padStart(2, '0');
-    const dia = String(fecha.getUTCDate()).padStart(2, '0');
-    return `${anio}-${mes}-${dia}`;
-  }
-
-  const texto = String(fecha).trim();
-  const iso = texto.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
-
-  const d = new Date(texto);
-  if (Number.isNaN(d.getTime())) return '';
-
-  const anio = d.getUTCFullYear();
-  const mes = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const dia = String(d.getUTCDate()).padStart(2, '0');
-  return `${anio}-${mes}-${dia}`;
-}
-
-function fechaBonita(fecha) {
-  const iso = fechaISO(fecha);
-  if (!iso) return '—';
-
-  const [anio, mes, dia] = iso.split('-').map(Number);
-  const d = new Date(Date.UTC(anio, mes - 1, dia));
-
-  return new Intl.DateTimeFormat('es-PE', {
-    weekday: 'short',
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'UTC'
-  }).format(d);
-}
-
-function etiquetaTurno(turno) {
-  return ETIQUETAS_TURNO[turno] || turno || 'Sin turno';
-}
-
-async function obtenerPermisoTurno() {
-  const filas = await sql`
-    WITH reloj AS (
-      SELECT (CURRENT_TIMESTAMP AT TIME ZONE 'America/Lima')::time AS hora
-    )
-    SELECT
-      u.id,
-      u.rol,
-      u.turno,
-      TO_CHAR((CURRENT_TIMESTAMP AT TIME ZONE 'America/Lima'), 'HH24:MI') AS hora_peru,
-      CASE
-        WHEN reloj.hora >= TIME '08:00' AND reloj.hora < TIME '13:00' THEN 'manana'
-        WHEN reloj.hora >= TIME '13:00' AND reloj.hora < TIME '18:00' THEN 'tarde'
-        ELSE 'noche-madrugada'
-      END AS turno_actual,
-      CASE
-        WHEN u.rol = 'administrador' THEN TRUE
-        WHEN u.rol = 'empleado' AND u.turno = (
-          CASE
-            WHEN reloj.hora >= TIME '08:00' AND reloj.hora < TIME '13:00' THEN 'manana'
-            WHEN reloj.hora >= TIME '13:00' AND reloj.hora < TIME '18:00' THEN 'tarde'
-            ELSE 'noche-madrugada'
-          END
-        ) THEN TRUE
-        ELSE FALSE
-      END AS puede_cambiar_estado
-    FROM usuarios u
-    CROSS JOIN reloj
-    WHERE u.id = ${usuario.id}
-    LIMIT 1;
-  `;
-
-  if (!filas.length) {
-    throw new Error('No se pudo validar el usuario activo.');
-  }
-
-  const fila = filas[0];
-  permisoTurno = {
-    puedeCambiarEstado: Boolean(fila.puede_cambiar_estado),
-    turnoActual: fila.turno_actual,
-    horaPeru: fila.hora_peru,
-    turnoUsuario: fila.turno
-  };
-
-  return permisoTurno;
-}
-
-function pintarUsuarioYTurno() {
-  const turnoUsuario = usuario.rol === 'empleado'
-    ? ` · ${etiquetaTurno(permisoTurno.turnoUsuario)}`
-    : '';
-
-  $('usuario-activo').textContent = `${usuario.nombre} · ${usuario.rol}${turnoUsuario}`;
-
-  if (usuario.rol === 'administrador') {
-    estadoTurno.innerHTML = `<strong>Administrador:</strong> puede cambiar estados en cualquier turno. Hora de Perú: ${escapar(permisoTurno.horaPeru)}.`;
-    estadoTurno.className = 'aviso-turno aviso-turno--ok';
-    return;
-  }
-
-  if (permisoTurno.puedeCambiarEstado) {
-    estadoTurno.innerHTML = `<strong>Turno habilitado:</strong> ${escapar(etiquetaTurno(permisoTurno.turnoUsuario))}. Puedes editar el estado de las citas. Hora de Perú: ${escapar(permisoTurno.horaPeru)}.`;
-    estadoTurno.className = 'aviso-turno aviso-turno--ok';
-  } else {
-    estadoTurno.innerHTML = `<strong>Fuera de turno:</strong> tu turno es ${escapar(etiquetaTurno(permisoTurno.turnoUsuario))} y ahora corresponde ${escapar(etiquetaTurno(permisoTurno.turnoActual))}. Puedes consultar y editar los demás datos, pero el estado queda bloqueado.`;
-    estadoTurno.className = 'aviso-turno aviso-turno--bloqueado';
-  }
-}
-
-async function refrescarPermisoTurno() {
-  await obtenerPermisoTurno();
-  pintarUsuarioYTurno();
-  return permisoTurno;
-}
-
-async function listarTodos() {
-  resumen.textContent = 'Cargando registros...';
-
+async function cargar() {
+  if (cargando) return;
+  cargando = true;
   try {
-    await refrescarPermisoTurno();
-
-    const filas = await sql`
-      SELECT c.*, u.nombre AS cliente_nombre, u.correo AS cliente_correo
-      FROM citas_sunarp c
-      LEFT JOIN usuarios u ON u.id = c.id_usuario
-      ORDER BY c.fecha_registro DESC, c.id DESC;
+    await obtenerPermiso();
+    registros = await sql`
+      SELECT r.*, p.codigo_operacion,
+        EXISTS (SELECT 1 FROM pagos h WHERE h.id_registro = r.id) AS tiene_historial
+      FROM citas_sunarp r
+      LEFT JOIN pagos p ON p.id_registro = r.id AND p.estado = 'aprobado'
+      ORDER BY r.fecha_registro DESC, r.id DESC;
     `;
-
-    resumen.textContent = `${filas.length} registro(s) en citas_sunarp.`;
-    tbody.innerHTML = filas.length ? filas.map(f => `
-      <tr>
-        <td>${escapar(f.codigo_seguimiento)}</td>
-        <td>${escapar(f.nombre_usuario)}</td>
-        <td>${escapar(f.dni)}</td>
-        <td>${escapar(f.tipo_tramite)}</td>
-        <td>${fechaBonita(f.fecha_cita)}</td>
-        <td><span class="estado estado--${escapar(f.estado)}">${escapar(f.estado)}</span></td>
-        <td>${f.id_usuario ? `${escapar(f.cliente_nombre)} (#${f.id_usuario})` : 'Atención directa'}</td>
-        <td class="acciones-tabla">
-          <button type="button" class="accion-tabla btn-editar" data-id="${f.id}">Editar</button>
-          <button type="button" class="accion-tabla accion-tabla--peligro btn-eliminar" data-id="${f.id}" data-codigo="${escapar(f.codigo_seguimiento)}">Eliminar</button>
-        </td>
-      </tr>
-    `).join('') : '<tr><td colspan="8">No existen registros.</td></tr>';
+    const tbody = $('cuerpo-panel');
+    tbody.replaceChildren();
+    for (const r of registros) {
+      const tr = document.createElement('tr');
+      [r.codigo_seguimiento, r.nombre_usuario, r.dni, r.paginas,
+        formatearSoles(r.monto_calculado), r.estado,
+        `${r.estado_pago} / ${r.canal_pago ?? '—'}`, estadoFirma(r)]
+        .forEach((v) => celda(tr, v));
+      const acciones = celda(tr);
+      if (!r.firma_digital_fecha) boton(acciones, 'Editar', 'editar', r.id);
+      if (r.firma_habilitada && !r.firma_digital_fecha && permisoTurno) {
+        boton(acciones, 'Firmar (simulado)', 'firmar', r.id);
+      }
+      if (!r.tiene_historial) boton(acciones, 'Eliminar', 'eliminar', r.id).className = 'peligro';
+      if (r.codigo_operacion) enlace(acciones, 'Comprobante', `comprobante.html?op=${encodeURIComponent(r.codigo_operacion)}`);
+      tbody.append(tr);
+    }
+    if (!registros.length) filaVacia(tbody, 9, 'No hay solicitudes.');
+    $('resumen-panel').textContent = `${registros.length} registro(s). El pago se gestiona exclusivamente por pasarela o caja.`;
+    await cargarHistorial();
   } catch (error) {
-    console.error(error);
-    resumen.textContent = 'No se pudieron cargar los registros.';
+    mensaje('mensaje-panel', errorAmigable(error), 'error');
+  } finally {
+    cargando = false;
   }
 }
 
 async function cargarHistorial() {
-  if (!historialBody) return;
-
-  try {
-    const filas = await sql`
-      SELECT h.id, h.cita_id, h.estado_anterior, h.estado_nuevo,
-             h.rol, h.turno, h.fecha_cambio,
-             u.nombre AS usuario_nombre
-      FROM historial_estados h
-      LEFT JOIN usuarios u ON u.id = h.usuario_id
-      ORDER BY h.fecha_cambio DESC, h.id DESC
-      LIMIT 30;
-    `;
-
-    historialBody.innerHTML = filas.length ? filas.map(h => `
-      <tr>
-        <td>${escapar(h.cita_id ?? '—')}</td>
-        <td>${escapar(h.estado_anterior)}</td>
-        <td>${escapar(h.estado_nuevo)}</td>
-        <td>${escapar(h.usuario_nombre || 'Usuario')}</td>
-        <td>${escapar(h.rol)}</td>
-        <td>${escapar(etiquetaTurno(h.turno))}</td>
-        <td>${escapar(new Date(h.fecha_cambio).toLocaleString('es-PE'))}</td>
-      </tr>
-    `).join('') : '<tr><td colspan="7">Aún no hay cambios de estado registrados.</td></tr>';
-  } catch (error) {
-    console.error(error);
-    historialBody.innerHTML = '<tr><td colspan="7">No se pudo cargar el historial. Ejecuta el SQL de turnos si la tabla aún no existe.</td></tr>';
+  const filas = await sql`
+    SELECT h.*, u.nombre FROM historial_estados h
+    LEFT JOIN usuarios u ON u.id = h.usuario_id
+    ORDER BY h.id DESC LIMIT 40;
+  `;
+  const tbody = $('cuerpo-historial');
+  tbody.replaceChildren();
+  for (const h of filas) {
+    const tr = document.createElement('tr');
+    [h.cita_id, h.estado_anterior, h.estado_nuevo, h.nombre, fechaLima(h.fecha_cambio)]
+      .forEach((v) => celda(tr, v));
+    tbody.append(tr);
   }
+  if (!filas.length) filaVacia(tbody, 5, 'Sin cambios de estado registrados.');
 }
 
 formCrear.addEventListener('submit', async (e) => {
   e.preventDefault();
-  if (!formCrear.checkValidity()) return formCrear.reportValidity();
-
-  const m = $('mensaje-panel');
-  m.textContent = 'Creando registro...';
-  const codigo = `SUN-${Date.now().toString().slice(-10)}`;
-
+  if (ocupado) return;
+  const d = leerFormulario(formCrear);
+  if (!validarDatos(formCrear, d)) return mensaje('mensaje-panel', 'Revisa los campos del registro.', 'error');
+  ocupado = true;
+  const b = formCrear.querySelector('button[type="submit"]');
+  b.disabled = true;
   try {
+    const codigo = 'SUN24-' + crypto.randomUUID().slice(0, 13).toUpperCase();
     await sql`
       INSERT INTO citas_sunarp (
-        codigo_seguimiento, nombre_usuario, dni, tipo_tramite, oficina,
-        fecha_cita, horario, celular, estado, id_usuario
+        codigo_seguimiento,nombre_usuario,dni,tipo_tramite,oficina,
+        fecha_cita,horario,celular,id_usuario,estado,paginas,monto_calculado,estado_pago
       ) VALUES (
-        ${codigo},
-        ${formCrear.elements.nombre.value.trim()},
-        ${formCrear.elements.dni.value.trim()},
-        ${textoSelect(formCrear, 'tramite')},
-        ${textoSelect(formCrear, 'oficina')},
-        ${formCrear.elements.fecha.value},
-        ${textoSelect(formCrear, 'hora')},
-        ${formCrear.elements.celular.value.trim()},
-        'registrado',
-        NULL
+        ${codigo},${d.nombre},${d.dni},'Expedición de vigencia de poder',${d.oficina},
+        ${d.fecha},${d.hora},${d.celular},NULL,'registrado',${Number(d.paginas)},${calcularMontoServicio(d)},'pendiente'
       );
     `;
-
+    await window.SunarpUI.notificar('Solicitud registrada', `Código ${codigo}. Comunícalo al cliente para pagar en caja.`);
     formCrear.reset();
-    m.textContent = `Registro creado: ${codigo}. id_usuario quedó en NULL por ser una atención desde el panel.`;
-    m.className = 'mensaje-sistema mensaje-sistema--ok';
-    await listarTodos();
+    mensaje('mensaje-panel', `Solicitud ${codigo} creada. Comunica el código al cliente para el cobro en caja.`, 'exito');
+    await cargar();
   } catch (error) {
-    console.error(error);
-    m.textContent = 'No se pudo crear el registro.';
-    m.className = 'mensaje-sistema mensaje-sistema--error';
+    mensaje('mensaje-panel', errorAmigable(error), 'error');
+  } finally {
+    ocupado = false;
+    b.disabled = false;
   }
 });
 
 async function abrirEdicion(id) {
-  try {
-    await refrescarPermisoTurno();
-
-    const filas = await sql`SELECT * FROM citas_sunarp WHERE id = ${id} LIMIT 1;`;
-    if (!filas.length) return;
-    const f = filas[0];
-
-    formEditar.elements.id.value = f.id;
-    formEditar.elements.codigo.value = f.codigo_seguimiento;
-    formEditar.elements.nombre.value = f.nombre_usuario;
-    formEditar.elements.dni.value = f.dni;
-    formEditar.elements.tramite.value = f.tipo_tramite;
-    formEditar.elements.oficina.value = f.oficina ?? '';
-    formEditar.elements.fecha.value = String(f.fecha_cita ?? '').slice(0, 10);
-    formEditar.elements.hora.value = f.horario ?? '';
-    formEditar.elements.celular.value = f.celular ?? '';
-    formEditar.elements.estado.value = f.estado;
-    formEditar.dataset.estadoOriginal = f.estado;
-
-    const selectEstado = formEditar.elements.estado;
-    const fueraDeTurno = usuario.rol === 'empleado' && !permisoTurno.puedeCambiarEstado;
-    selectEstado.disabled = fueraDeTurno;
-
-    $('nota-estado-turno').textContent = fueraDeTurno
-      ? `Estado bloqueado: este empleado está fuera de su turno (${etiquetaTurno(permisoTurno.turnoUsuario)}).`
-      : usuario.rol === 'administrador'
-        ? 'Administrador: puede cambiar el estado en cualquier horario.'
-        : `Turno activo: ${etiquetaTurno(permisoTurno.turnoUsuario)}. Puedes cambiar el estado.`;
-
-    if (typeof modal.showModal === 'function') modal.showModal();
-    else modal.setAttribute('open', '');
-  } catch (error) {
-    console.error(error);
-    alert('No se pudo abrir el registro.');
-  }
+  await obtenerPermiso();
+  const filas = await sql`SELECT * FROM citas_sunarp WHERE id = ${id}`;
+  original = filas[0];
+  if (!original || original.firma_digital_fecha) throw new Error('La solicitud ya no está disponible para editar.');
+  cargarCampos(formEditar, original);
+  formEditar.elements.id.value = original.id;
+  const select = formEditar.elements.estado;
+  if (![...select.options].some((o) => o.value === original.estado)) select.add(new Option(original.estado, original.estado));
+  select.value = original.estado;
+  select.disabled = !permisoTurno;
+  $('datos-editables').disabled = original.estado_pago !== 'pendiente';
+  $('nota-editar').textContent = original.estado_pago === 'pagado'
+    ? 'Pago confirmado: la fecha, los datos y las páginas se muestran para consulta y están bloqueados. Solo se permite gestión operativa.'
+    : 'El monto se recalcula al cambiar las páginas. El estado financiero no se edita aquí.';
+  cotizarEditar();
+  mensaje('mensaje-editar', '');
+  modal.showModal();
 }
 
 formEditar.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const id = Number(formEditar.elements.id.value);
-
+  if (ocupado || !original) return;
+  const editarDatos = original.estado_pago === 'pendiente';
+  const d = editarDatos ? leerFormulario(formEditar) : null;
+  if (editarDatos && !validarDatos(formEditar, d)) return mensaje('mensaje-editar', 'Revisa los datos y las páginas.', 'error');
+  ocupado = true;
+  const b = formEditar.querySelector('button[type="submit"]');
+  b.disabled = true;
+  const estado = formEditar.elements.estado.disabled ? original.estado : formEditar.elements.estado.value;
   try {
-    await refrescarPermisoTurno();
-
-    const originales = await sql`
-      SELECT estado
-      FROM citas_sunarp
-      WHERE id = ${id}
-      LIMIT 1;
-    `;
-
-    if (!originales.length) {
-      throw new Error('El registro ya no existe.');
+    const operaciones = [];
+    if (editarDatos) {
+      operaciones.push(sql`SELECT c24_exigir_pendiente(${original.id})`);
+      operaciones.push(sql`
+        UPDATE citas_sunarp SET nombre_usuario = ${d.nombre}, dni = ${d.dni}, celular = ${d.celular},
+          oficina = ${d.oficina}, fecha_cita = ${d.fecha}, horario = ${d.hora},
+          paginas = ${Number(d.paginas)}, monto_calculado = ${calcularMontoServicio(d)}
+        WHERE id = ${original.id} AND estado_pago = 'pendiente';
+      `);
     }
-
-    const estadoAnterior = originales[0].estado;
-    const estadoSolicitado = formEditar.elements.estado.disabled
-      ? estadoAnterior
-      : formEditar.elements.estado.value;
-
-    const filas = await sql`
-      UPDATE citas_sunarp AS c
-      SET nombre_usuario = ${formEditar.elements.nombre.value.trim()},
-          dni = ${formEditar.elements.dni.value.trim()},
-          tipo_tramite = ${formEditar.elements.tramite.value.trim()},
-          oficina = ${formEditar.elements.oficina.value.trim()},
-          fecha_cita = ${formEditar.elements.fecha.value},
-          horario = ${formEditar.elements.hora.value.trim()},
-          celular = ${formEditar.elements.celular.value.trim()},
-          estado = CASE
-            WHEN ${usuario.rol} = 'administrador' THEN ${estadoSolicitado}
-            WHEN EXISTS (
-              SELECT 1
-              FROM usuarios u
-              WHERE u.id = ${usuario.id}
-                AND u.rol = 'empleado'
-                AND (
-                  (u.turno = 'manana' AND (CURRENT_TIMESTAMP AT TIME ZONE 'America/Lima')::time >= TIME '08:00' AND (CURRENT_TIMESTAMP AT TIME ZONE 'America/Lima')::time < TIME '13:00')
-                  OR
-                  (u.turno = 'tarde' AND (CURRENT_TIMESTAMP AT TIME ZONE 'America/Lima')::time >= TIME '13:00' AND (CURRENT_TIMESTAMP AT TIME ZONE 'America/Lima')::time < TIME '18:00')
-                  OR
-                  (u.turno = 'noche-madrugada' AND ((CURRENT_TIMESTAMP AT TIME ZONE 'America/Lima')::time >= TIME '18:00' OR (CURRENT_TIMESTAMP AT TIME ZONE 'America/Lima')::time < TIME '08:00'))
-                )
-            ) THEN ${estadoSolicitado}
-            ELSE c.estado
-          END
-      WHERE c.id = ${id}
-      RETURNING c.estado;
-    `;
-
-    if (!filas.length) {
-      throw new Error('No se pudo actualizar el registro.');
-    }
-
-    const estadoFinal = filas[0].estado;
-
-    if (estadoFinal !== estadoAnterior) {
-      await sql`
-        INSERT INTO historial_estados (
-          cita_id, usuario_id, rol, turno,
-          estado_anterior, estado_nuevo, fecha_cambio
-        ) VALUES (
-          ${id},
-          ${usuario.id},
-          ${usuario.rol},
-          ${usuario.turno || null},
-          ${estadoAnterior},
-          ${estadoFinal},
-          CURRENT_TIMESTAMP AT TIME ZONE 'America/Lima'
-        );
-      `;
-    }
-
+    operaciones.push(sql`SELECT c24_cambiar_estado(${original.id}, ${usuario.id}, ${estado})`);
+    await sql.transaction(operaciones);
     modal.close();
-
-    if (usuario.rol === 'empleado' && estadoSolicitado !== estadoAnterior && estadoFinal === estadoAnterior) {
-      $('mensaje-panel').textContent = 'Los demás datos se actualizaron, pero el estado no cambió porque el empleado está fuera de su turno.';
-      $('mensaje-panel').className = 'mensaje-sistema mensaje-sistema--error';
-    } else {
-      $('mensaje-panel').textContent = estadoFinal !== estadoAnterior
-        ? `Registro actualizado. Estado: ${estadoAnterior} → ${estadoFinal}. El cambio quedó registrado en el historial.`
-        : 'Registro actualizado correctamente.';
-      $('mensaje-panel').className = 'mensaje-sistema mensaje-sistema--ok';
-    }
-
-    await Promise.all([listarTodos(), cargarHistorial()]);
+    mensaje('mensaje-panel', 'Solicitud actualizada.', 'exito');
+    await window.SunarpUI.notificar('Cambios guardados', 'La solicitud fue actualizada correctamente.');
+    await cargar();
   } catch (error) {
-    console.error(error);
-    $('mensaje-panel').textContent = error.message || 'No se pudo actualizar el registro.';
-    $('mensaje-panel').className = 'mensaje-sistema mensaje-sistema--error';
+    mensaje('mensaje-editar', errorAmigable(error), 'error');
+  } finally {
+    ocupado = false;
+    b.disabled = false;
   }
 });
 
-async function eliminar(id, codigo) {
-  if (!confirm(`¿Eliminar definitivamente la cita ${codigo}?`)) return;
-
+$('cerrar-modal').addEventListener('click', () => { if (!ocupado) modal.close(); });
+modal.addEventListener('cancel', (e) => { if (ocupado) e.preventDefault(); });
+$('cuerpo-panel').addEventListener('click', async (e) => {
+  const b = e.target.closest('button[data-accion]');
+  if (!b || ocupado) return;
+  const id = Number(b.dataset.id);
   try {
-    await sql`DELETE FROM citas_sunarp WHERE id = ${id};`;
-    $('mensaje-panel').textContent = `Registro ${codigo} eliminado.`;
-    $('mensaje-panel').className = 'mensaje-sistema mensaje-sistema--ok';
-    await listarTodos();
+    if (b.dataset.accion === 'editar') return await abrirEdicion(id);
+    const r = registros.find((fila) => Number(fila.id) === id);
+    if (!r) return;
+    accionPendiente = { id, accion: b.dataset.accion };
+    $('texto-accion').textContent = b.dataset.accion === 'firmar'
+      ? `Se registrará la firma digital simulada y la atención de ${r.codigo_seguimiento}. Se validarán nuevamente el pago, la verificación y el turno.`
+      : `¿Eliminar ${r.codigo_seguimiento}? Solo se permite si no tiene ningún historial de pagos.`;
+    $('dialogo-accion').showModal();
   } catch (error) {
-    console.error(error);
-    alert('No se pudo eliminar el registro.');
+    mensaje('mensaje-panel', errorAmigable(error), 'error');
   }
-}
-
-tbody.addEventListener('click', (e) => {
-  const editar = e.target.closest('.btn-editar');
-  if (editar) abrirEdicion(Number(editar.dataset.id));
-
-  const borrar = e.target.closest('.btn-eliminar');
-  if (borrar) eliminar(Number(borrar.dataset.id), borrar.dataset.codigo);
 });
-
-$('cerrar-modal').addEventListener('click', () => modal.close());
-
-Promise.all([listarTodos(), cargarHistorial()]);
+$('cancelar-accion').addEventListener('click', () => { if (!ocupado) $('dialogo-accion').close(); });
+$('dialogo-accion').addEventListener('cancel', (e) => { if (ocupado) e.preventDefault(); });
+$('confirmar-accion').addEventListener('click', async () => {
+  if (ocupado || !accionPendiente) return;
+  ocupado = true;
+  $('confirmar-accion').disabled = true;
+  try {
+    if (accionPendiente.accion === 'firmar') {
+      const filas = await sql`SELECT c24_firmar(${accionPendiente.id}, ${usuario.id}) AS codigo`;
+      mensaje('mensaje-panel', `Documento firmado en simulación: ${filas[0].codigo}.`, 'exito');
+    } else {
+      await sql`DELETE FROM citas_sunarp WHERE id = ${accionPendiente.id}`;
+      mensaje('mensaje-panel', 'Solicitud eliminada.', 'exito');
+    }
+    $('dialogo-accion').close();
+    await window.SunarpUI.notificar('Operación completada', $('mensaje-panel').textContent);
+    await cargar();
+  } catch (error) {
+    $('dialogo-accion').close();
+    mensaje('mensaje-panel', errorAmigable(error), 'error');
+  } finally {
+    ocupado = false;
+    $('confirmar-accion').disabled = false;
+  }
+});
+$('refrescar').addEventListener('click', cargar);
+cargar();

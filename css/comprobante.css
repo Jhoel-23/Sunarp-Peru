@@ -1,0 +1,65 @@
+@import url("base.css");
+.recibo {
+  max-width: 760px;
+  margin-inline: auto;
+  border-top: 5px solid var(--verde);
+}
+
+.recibo dl {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 10px 20px;
+}
+
+.recibo dt {
+  color: #5b766a;
+}
+
+.recibo dd {
+  margin: 0;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.acciones {
+  text-align: center;
+}
+
+@media print {
+  @page {
+    margin: 18mm;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  .cabecera, .sesion, .saltar, .no-imprimir, footer, main > .rotulo, main > h1 {
+    display: none !important;
+  }
+
+  main {
+    padding: 0;
+    margin: 0;
+  }
+
+  .recibo {
+    box-shadow: none;
+    border: 1px solid #777;
+    max-width: none;
+  }
+
+}
+
+@media (max-width: 500px) {
+  .recibo dl {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .recibo dd {
+    margin-bottom: 10px;
+  }
+
+}
