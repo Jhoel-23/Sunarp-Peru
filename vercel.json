@@ -1,73 +1,18 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [
+  "framework": null,
+  "buildCommand": "",
+  "outputDirectory": ".",
+  "redirects": [
     {
       "source": "/",
-      "destination": "/index.html/login.html"
-    },
-    {
-      "source": "/index.html",
-      "destination": "/index.html/index.html"
-    },
-    {
-      "source": "/login.html",
-      "destination": "/index.html/login.html"
+      "destination": "/login.html",
+      "permanent": false
     },
     {
       "source": "/citas.html",
-      "destination": "/index.html/citas.html"
-    },
-    {
-      "source": "/consulta.html",
-      "destination": "/index.html/consulta.html"
-    },
-    {
-      "source": "/consulta-partida.html",
-      "destination": "/index.html/consulta-partida.html"
-    },
-    {
-      "source": "/actualizar.html",
-      "destination": "/index.html/actualizar.html"
-    },
-    {
-      "source": "/panel.html",
-      "destination": "/index.html/panel.html"
-    },
-    {
-      "source": "/tramites.html",
-      "destination": "/index.html/tramites.html"
-    },
-    {
-      "source": "/contacto.html",
-      "destination": "/index.html/contacto.html"
-    },
-    {
-      "source": "/caja.html",
-      "destination": "/index.html/caja.html"
-    },
-    {
-      "source": "/pago.html",
-      "destination": "/index.html/pago.html"
-    },
-    {
-      "source": "/comprobante.html",
-      "destination": "/index.html/comprobante.html"
-    },
-    {
-      "source": "/css/:path*",
-      "destination": "/index.html/css/:path*"
-    },
-    {
-      "source": "/js/:path*",
-      "destination": "/index.html/js/:path*"
-    },
-    {
-      "source": "/Js/:path*",
-      "destination": "/index.html/Js/:path*"
-    },
-    {
-      "source": "/img/:path*",
-      "destination": "/index.html/img/:path*"
+      "destination": "/registro.html",
+      "permanent": false
     }
   ]
 }
